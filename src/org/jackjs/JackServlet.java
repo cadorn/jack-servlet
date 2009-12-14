@@ -22,7 +22,7 @@ public class JackServlet extends HttpServlet {
 		final String environmentName = getInitParam(config, "environment", null);
     	
 		final String narwhalHome = getServletContext().getRealPath("WEB-INF/narwhal");
-		final String narwhalFilename = "platforms/rhino/bootstrap.js";
+		final String narwhalFilename = "engines/rhino/bootstrap.js";
 		
 		Context context = Context.enter();
 		try {
