@@ -7,6 +7,17 @@ Requirements
 1. Narwhal: http://github.com/tlrobinson/narwhal
 2. Jack: http://github.com/tlrobinson/jack
 
+Quick Start
+------------
+<pre>
+git clone git://github.com/280north/narwhal.git
+export PATH=$PATH:narwhal/bin
+tusk install jack
+git clone git://github.com/tlrobinson/jack-servlet.git
+cd jack-servlet
+ant runserver
+</pre>
+
 AppEngine Instructions
 ----------------------
 
