@@ -1,1 +1,1 @@
-../../../jack/examples/example.js
+narwhal/packages/jack/examples/example.js
