@@ -1,5 +1,6 @@
 package org.jackjs;
 import java.io.IOException;
+import java.io.File;
 import javax.servlet.http.*;
 import javax.servlet.*;
 
@@ -21,6 +22,7 @@ public class JackServlet extends HttpServlet {
         final String appName = getInitParam(config, "app", "app");
         final String environmentName = getInitParam(config, "environment", null);
 
+        final String usingPath = getServletContext().getRealPath("WEB-INF/using");
         final String narwhalHome = getServletContext().getRealPath("WEB-INF/narwhal");
         final String narwhalFilename = "engines/rhino/bootstrap.js";
 
@@ -30,10 +32,24 @@ public class JackServlet extends HttpServlet {
             scope = new ImporterTopLevel(context);
 
             ScriptableObject.putProperty(scope, "NARWHAL_HOME",  Context.javaToJS(narwhalHome, scope));
+            ScriptableObject.putProperty(scope, "SEA",  Context.javaToJS(getServletContext().getRealPath("WEB-INF"), scope));
             //ScriptableObject.putProperty(scope, "$DEBUG",  Context.javaToJS(true, scope));
 
             // load Narwhal
             context.evaluateReader(scope, new FileReader(narwhalHome+"/"+narwhalFilename), narwhalFilename, 1, null);
+
+            // enable wildfire if present
+            boolean wildfire = false;
+            String wildfirePkgId = "github.com/cadorn/wildfire/zipball/master/packages/lib-js-system";
+            try {
+                if(new java.io.File(usingPath+"/"+wildfirePkgId).isDirectory()) {
+                    wildfire = true;
+                    // add wildfire system package to require.paths
+                    context.evaluateString(scope, "require.paths.push('" + usingPath + "/" + wildfirePkgId + "/lib');", null, 1, null);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             // load Servlet handler "process" method
             handler = (Function)context.evaluateString(scope, "require('jack/handler/servlet').Servlet.process;", null, 1, null);
@@ -42,6 +58,14 @@ public class JackServlet extends HttpServlet {
             Scriptable module = (Scriptable)context.evaluateString(scope, "require('"+modulesPath+"/"+moduleName+"');", null, 1, null);
 
             app = (Function)module.get(appName, module);
+
+            if(wildfire) {
+                // pass all responses through the wildfire dispatcher to add headers
+                // app = require("wildfire/binding/jack").Dispatcher(app);
+                Scriptable wildfireModule = (Scriptable)context.evaluateString(scope, "require('wildfire/binding/jack');", null, 1, null);
+                Object args[] = {app};
+                app = (Function)((Function)wildfireModule.get("Dispatcher", wildfireModule)).call(context, scope, wildfireModule, args);
+            }
 
             if (environmentName != null) {
                 Object environment = module.get(environmentName, module);
