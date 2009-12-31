@@ -60,3 +60,20 @@ Notes
     </servlet>
 
 * In addition to the "war/WEB-INF/narwhal" symlink, there are relative symlinks to Rhino in "war/WEB-INF/lib/js.jar" and an example application at "war/WEB-INF/jackconfig.js"
+
+
+Wildfire
+--------
+
+You can enable [wildfire](http://github.com/cadorn/wildfire) support with
+
+    <servlet>
+      <init-param>
+        <param-name>wildfire</param-name>
+        <param-value>1</param-value>
+      </init-param>
+    </servlet>
+
+and place the [wildfire using packages](http://github.com/cadorn/wildfire/blob/master/packages/lib-js-system/examples/jack/README.md) into `war/WEB-INF/using`.
+
+
